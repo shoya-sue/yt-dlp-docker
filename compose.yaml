@@ -1,0 +1,32 @@
+# Docker Desktop の Containers 画面で "yt-dlp-docker" としてまとめて表示される
+name: yt-dlp-docker
+
+x-sandbox: &sandbox
+  image: yt-dlp-sandbox
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 256
+  mem_limit: 2g
+  volumes:
+    - ./downloads:/downloads
+  logging:
+    driver: json-file
+    options:
+      max-size: 50m
+      max-file: "3"
+
+services:
+  ytdl:
+    <<: *sandbox
+    build: .
+    tmpfs:
+      - /tmp:size=512m
+      - /home/app:size=64m
+
+  shrink:
+    <<: *sandbox
+    network_mode: none
+    entrypoint: ["shrink"]
+    tmpfs:
+      - /tmp:size=256m

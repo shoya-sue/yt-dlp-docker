@@ -14,9 +14,12 @@ COPY --from=deno /deno /usr/local/bin/deno
 
 RUN pip install --no-cache-dir "yt-dlp[default]==${YTDLP_VERSION}"
 
+COPY bin/shrink.sh /usr/local/bin/shrink
+
 # root で動かさない
 RUN useradd --create-home --uid 1000 app
 USER app
 WORKDIR /downloads
 
-ENTRYPOINT ["yt-dlp", "--no-update", "-o", "/downloads/%(title)s [%(id)s].%(ext)s"]
+# --verbose / --newline: docker logs と Docker Desktop で進捗を 1 行ずつ追えるようにする
+ENTRYPOINT ["yt-dlp", "--no-update", "--verbose", "--newline", "-o", "/downloads/%(title)s [%(id)s].%(ext)s"]
